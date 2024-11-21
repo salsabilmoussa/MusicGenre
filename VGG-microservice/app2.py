@@ -5,8 +5,10 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 model = load_model('model.h5')
 

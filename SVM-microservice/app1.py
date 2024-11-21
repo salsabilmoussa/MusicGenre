@@ -5,9 +5,12 @@ from flask import Flask, request, jsonify
 import librosa
 import numpy as np
 import os
-import joblib  
+import joblib 
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 
 model = joblib.load('model.pkl')
 
