@@ -5,9 +5,10 @@ pipeline {
         GIT_REPO = 'https://github.com/salsabilmoussa/MusicGenre.git'
         GIT_CREDENTIALS_ID = 'github_token'
         DOCKER_HUB_CREDENTIALS_ID = 'dockerhub_credentials'
-        DOCKER_IMAGE_SVM = "svm-microservice_image"
-        DOCKER_IMAGE_VGG = "vgg-microservice_image"
-        DOCKER_IMAGE_FRONTEND = "frontend_image"
+        DOCKER_IMAGE_SVM = "svm-microservice-1"
+        DOCKER_IMAGE_VGG = "vgg-microservice-1"
+        DOCKER_IMAGE_FRONTEND = "frontend-1"
+        WORKSPACE_PATH = 'C:/Users/Chifa/Desktop/projet/MusicGenre'  // Ajouter cette ligne pour définir le chemin de votre workspace
     }
 
     stages {
@@ -16,17 +17,14 @@ pipeline {
                 git branch: 'chifa', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
             }
         }
-        
+
         stage('Build Docker Images') {
             steps {
                 script {
-                    // Utiliser un chemin absolu pour la construction des images Docker
-                    def workspace = pwd() // Récupérer le répertoire de travail actuel
-                    
-                    // Les chemins relatifs à partir de Jenkins/ vers les dossiers de services
-                    docker.build(DOCKER_IMAGE_SVM, "${workspace}/../SVM-microservice")
-                    docker.build(DOCKER_IMAGE_VGG, "${workspace}/../VGG-microservice")
-                    docker.build(DOCKER_IMAGE_FRONTEND, "${workspace}/../frontend")
+                    // Utiliser un chemin absolu pour chaque service
+                    docker.build(DOCKER_IMAGE_SVM, "${WORKSPACE_PATH}/SVM-microservice")
+                    docker.build(DOCKER_IMAGE_VGG, "${WORKSPACE_PATH}/VGG-microservice")
+                    docker.build(DOCKER_IMAGE_FRONTEND, "${WORKSPACE_PATH}/frontend")
                 }
             }
         }
@@ -34,8 +32,8 @@ pipeline {
         stage('Run Docker Compose') {
             steps {
                 script {
-                    // Start Docker Compose for all services
-                    sh 'docker-compose -f ../docker-compose.yaml up -d'
+                    // Démarrer Docker Compose pour tous les services en utilisant un chemin absolu
+                    bat "docker-compose -f ${WORKSPACE_PATH}/docker-compose.yaml up -d"
                 }
             }
         }
@@ -43,10 +41,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Run automated tests for each service using docker-compose
-                    sh 'docker-compose exec -T svm-microservice pytest Jenkins/svm_tests.py'
-                    sh 'docker-compose exec -T vgg19-microservice pytest Jenkins/vgg19_tests.py'
-                    sh 'docker-compose exec -T frontend pytest Jenkins/frontend_tests.py'
+                    // Lancer les tests automatisés pour chaque service via docker-compose
+                    bat "docker-compose exec -T svm-microservice pytest ${WORKSPACE_PATH}/Jenkins/svm_tests.py"
+                    bat "docker-compose exec -T vgg19-microservice pytest ${WORKSPACE_PATH}/Jenkins/vgg19_tests.py"
+                    bat "docker-compose exec -T frontend pytest ${WORKSPACE_PATH}/Jenkins/frontend_tests.py"
                 }
             }
         }
@@ -54,8 +52,8 @@ pipeline {
         stage('Stop Services') {
             steps {
                 script {
-                    // Stop all containers after tests
-                    sh 'docker-compose down'
+                    // Arrêter tous les conteneurs après les tests
+                    bat "docker-compose down"
                 }
             }
         }
