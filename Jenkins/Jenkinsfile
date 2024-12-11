@@ -13,10 +13,11 @@ pipeline {
                 checkout scm
             }
         }
-         stage('Clone') {
+        stage('Clone') {
             steps {
                 git branch: 'chifa', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
-            }}
+            }
+        }
         stage('Build Docker Images') {
             steps {
                 script {
