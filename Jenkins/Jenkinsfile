@@ -8,12 +8,7 @@ pipeline {
         DOCKER_IMAGE_FRONTEND = "frontend_image"
     }
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        stage('Clone') {
+       stage('Checkout') {
             steps {
                 git branch: 'chifa', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
             }
