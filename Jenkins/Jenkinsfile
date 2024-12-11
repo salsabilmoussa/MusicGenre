@@ -10,6 +10,13 @@ pipeline {
     }
 
     stages {
+        stage('Check Git Version') {
+    steps {
+        sh 'git --version'
+    }
+}
+
+
         stage('Checkout') {
             steps {
                 git branch: 'chifa', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
