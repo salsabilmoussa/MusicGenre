@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Service pour le backend SVM
   svm-microservice:
     build:
       context: ./SVM-microservice
@@ -10,7 +11,10 @@ services:
       - app_network
     depends_on:
       - vgg-microservice
+    environment:
+      - FLASK_ENV=development
 
+  # Service pour le backend VGG
   vgg-microservice:
     build:
       context: ./VGG-microservice
@@ -18,6 +22,23 @@ services:
       - "5002:5002"
     networks:
       - app_network
+    environment:
+      - FLASK_ENV=development
+
+  # Service pour le frontend Angular
+  frontend:
+    build:
+      context: ./frontend/music-genre
+    ports:
+      - "80:80"
+    networks:
+      - app_network
+    depends_on:
+      - svm-microservice
+      - vgg-microservice
+    environment:
+      - API_SVM_URL=http://svm-microservice:5001/predict
+      - API_VGG_URL=http://vgg-microservice:5002/predict
 
 networks:
   app_network:

@@ -24,7 +24,7 @@ pipeline {
                     // Utiliser un chemin absolu pour chaque service
                     docker.build(DOCKER_IMAGE_SVM, "${WORKSPACE_PATH}/SVM-microservice")
                     docker.build(DOCKER_IMAGE_VGG, "${WORKSPACE_PATH}/VGG-microservice")
-                    docker.build(DOCKER_IMAGE_FRONTEND, "${WORKSPACE_PATH}/frontend")
+                    docker.build(DOCKER_IMAGE_FRONTEND, "${WORKSPACE_PATH}/frontend/music-genre")
                 }
             }
         }
