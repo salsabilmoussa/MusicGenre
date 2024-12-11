@@ -4,51 +4,54 @@ pipeline {
     environment {
         GIT_REPO = 'https://github.com/salsabilmoussa/MusicGenre.git'
         GIT_CREDENTIALS_ID = 'github_token'
+        DOCKER_HUB_CREDENTIALS_ID = 'dockerhub_credentials'
         DOCKER_IMAGE_SVM = "svm-microservice_image"
         DOCKER_IMAGE_VGG = "vgg-microservice_image"
         DOCKER_IMAGE_FRONTEND = "frontend_image"
     }
 
     stages {
-   
-
         stage('Checkout') {
             steps {
                 git branch: 'chifa', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
             }
         }
+        
         stage('Build Docker Images') {
             steps {
                 script {
                     // Build Docker images for SVM service
-                    docker.build(DOCKER_IMAGE_SVM, './SVM_microservice')
+                    docker.build(DOCKER_IMAGE_SVM, '../SVM-microservice')
 
                     // Build Docker images for VGG19 service
-                    docker.build(DOCKER_IMAGE_VGG, './VGG_microservice')
+                    docker.build(DOCKER_IMAGE_VGG, '../VGG-microservice')
 
                     // Build Docker image for the frontend
-                    docker.build(DOCKER_IMAGE_FRONTEND, './frontend')
+                    docker.build(DOCKER_IMAGE_FRONTEND, '../frontend')
                 }
             }
         }
+
         stage('Run Docker Compose') {
             steps {
                 script {
                     // Start Docker Compose for all services
-                    sh 'docker-compose -f ./docker-compose.yaml up -d'
+                    sh 'docker-compose -f ../docker-compose.yaml up -d'
                 }
             }
         }
+
         stage('Run Tests') {
             steps {
                 script {
                     // Run automated tests for each service using docker-compose
-                    sh 'docker-compose exec -T svm_service_container pytest Jenkins/svm_tests.py'
-                    sh 'docker-compose exec -T vgg19_service_container pytest Jenkins/vgg19_tests.py'
-                    sh 'docker-compose exec -T frontend_container pytest Jenkins/frontend_tests.py'
+                    sh 'docker-compose exec -T svm-microservice pytest Jenkins/svm_tests.py'
+                    sh 'docker-compose exec -T vgg19-microservice pytest Jenkins/vgg19_tests.py'
+                    sh 'docker-compose exec -T frontend pytest Jenkins/frontend_tests.py'
                 }
             }
         }
+
         stage('Stop Services') {
             steps {
                 script {
