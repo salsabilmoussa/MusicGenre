@@ -1,8 +1,10 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE_SVM = "svm_service_image"
-        DOCKER_IMAGE_VGG = "vgg19_service_image"
+        GIT_REPO = 'https://github.com/salsabilmoussa/MusicGenre.git'
+        GIT_CREDENTIALS_ID = 'github_token'
+        DOCKER_IMAGE_SVM = "svm-microservice_image"
+        DOCKER_IMAGE_VGG = "vgg-microservice_image"
         DOCKER_IMAGE_FRONTEND = "frontend_image"
     }
     stages {
@@ -11,20 +13,18 @@ pipeline {
                 checkout scm
             }
         }
-       stage('Clone') {
+         stage('Clone') {
             steps {
-                // Clone the specific branch
-                git branch: 'chifa', url: 'https://github.com/salsabilmoussa/MusicGenre.git'
-            }
-        }
+                git branch: 'chifa', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
+            }}
         stage('Build Docker Images') {
             steps {
                 script {
                     // Build Docker images for SVM service
-                    docker.build(DOCKER_IMAGE_SVM, '../SVM_service/Dockerfile')
+                    docker.build(DOCKER_IMAGE_SVM, '../SVM_microservice/Dockerfile')
 
                     // Build Docker images for VGG19 service
-                    docker.build(DOCKER_IMAGE_VGG, '../VGG19_service/Dockerfile')
+                    docker.build(DOCKER_IMAGE_VGG, '../VGG_microservice/Dockerfile')
 
                     // Build Docker image for the frontend
                     docker.build(DOCKER_IMAGE_FRONTEND, '../frontend/Dockerfile')
