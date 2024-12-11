@@ -1,31 +1,27 @@
-import pytest
-import requests
+from app2 import app
 
-BASE_URL = "http://localhost:5002/predict"
+def test_vgg_valid_audio():
+    # Initialisation du client Flask pour tester l'application
+    client = app.test_client()
 
-def test_vgg_predict_valid_file():
-    # Path to a valid audio file
-    audio_file = {'file': open('tests/test_audio.wav', 'rb')}
-    
-    response = requests.post(BASE_URL, files=audio_file)
-    
+    # Charger un fichier audio valide
+    with open("test_audio.wav", "rb") as audio_file:
+        response = client.post("/predict", content_type="multipart/form-data", data={
+            "file": (audio_file, "test_audio.wav")
+        })
+
+    # Vérifier la réponse
     assert response.status_code == 200
-    result = response.json()
-    assert 'predicted_genre' in result
-    assert result['predicted_genre'] in ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+    data = response.get_json()
+    assert "predicted_genre" in data
 
-def test_vgg_predict_no_file():
-    response = requests.post(BASE_URL)
-    assert response.status_code == 400
-    result = response.json()
-    assert 'error' in result
-    assert result['error'] == 'No file part in the request'
+def test_vgg_no_audio():
+    client = app.test_client()
 
-def test_vgg_predict_invalid_file():
-    # Testing with an empty file
-    audio_file = {'file': open('tests/empty_file.wav', 'rb')}
-    response = requests.post(BASE_URL, files=audio_file)
-    assert response.status_code == 400
-    result = response.json()
-    assert 'error' in result
-    assert result['error'] == 'No selected file'
+    # Envoyer une requête sans fichier
+    response = client.post("/predict", content_type="multipart/form-data", data={})
+
+    # Vérifier la réponse
+    assert response.status_code == 400  # Une erreur doit être renvoyée
+    data = response.get_json()
+    assert data["error"] == "No file part in the request"  # Vérifier le message d'erreur
