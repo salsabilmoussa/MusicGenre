@@ -11,10 +11,10 @@ pipeline {
                 checkout scm
             }
         }
-                stage('Clone') {
+       stage('Clone') {
             steps {
-                git branch:'chifa'
-                url:https://github.com/salsabilmoussa/MusicGenre/Jenkins
+                // Clone the specific branch
+                git branch: 'chifa', url: 'https://github.com/salsabilmoussa/MusicGenre/Jenkins'
             }
         }
         stage('Build Docker Images') {
