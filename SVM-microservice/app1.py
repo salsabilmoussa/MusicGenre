@@ -1,55 +1,42 @@
-# SVM
-
-
 from flask import Flask, request, jsonify
+import joblib
 import librosa
 import numpy as np
-import os
-import joblib 
-from flask_cors import CORS
-
+from flask_cors import CORS 
 
 app = Flask(__name__)
 CORS(app)
 
-model = joblib.load('model.pkl')
+# Load the trained model
+model = joblib.load("model.pkl")
 
-@app.route('/predict', methods=['POST'])
+# Define genre labels
+genres = ["blues", "classical", "country", "disco", "hiphop", "jazz", "metal", "pop", "reggae", "rock"]
+
+@app.route("/predict", methods=["POST"])
 def predict():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
+    if "file" not in request.files:
+        return jsonify({"error": "No audio file provided"}), 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-
-    file_path = './temp_audio.wav'
-    file.save(file_path)
+    file = request.files["file"]
 
     try:
-        y, sr = librosa.load(file_path, sr=None)
+        signal, rate = librosa.load(file, sr=None)
+        hop_length = 512
+        n_fft = 2048
+        n_mels = 128
+        S = librosa.feature.melspectrogram(y=signal, sr=rate, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+        S_DB = librosa.power_to_db(S, ref=np.max)
+        S_DB = S_DB.flatten()[:1200] 
+        feature = np.array(S_DB).reshape(1, -1)
 
-        spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
-        spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
+        # Make prediction
+        genre_index = model.predict(feature)[0]
+        predicted_genre = genres[genre_index]
 
-        spectral_centroid_avg = np.mean(spectral_centroids)
-        spectral_rolloff_avg = np.mean(spectral_rolloff)
-
-        features = np.array([spectral_centroid_avg, spectral_rolloff_avg]).reshape(1, -1)
-
-        predicted_genre = model.predict(features)[0]
-
-        result = {
-            "predicted_genre": predicted_genre,
-        }
+        return jsonify({"predicted_genre": predicted_genre})
     except Exception as e:
-        result = {"error": str(e)}
-    finally:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        return jsonify({"error": str(e)}), 500
 
-    return jsonify(result)
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
-
+if __name__ == "__main__":
+    app.run(debug=True,host='0.0.0.0',port=5001)
