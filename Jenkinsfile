@@ -1,15 +1,16 @@
 pipeline {
     agent any
     environment {
+         GIT_REPO = 'https://github.com/salsabilmoussa/MusicGenre.git'
+        GIT_CREDENTIALS_ID = 'github_token'
         DOCKER_IMAGE_SVM = "svm-microservice"
         DOCKER_IMAGE_VGG = "vgg-microservice"
         DOCKER_IMAGE_FRONTEND = "frontend"
     }
     stages {
-            stage('Clone') {
+             stage('Checkout') {
             steps {
-                git branch: 'master'
-                url: 'https://github.com/salsabilmoussa/MusicGenre.git'
+                git branch: 'main', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GIT_REPO}"
             }
         }
         
@@ -30,13 +31,14 @@ pipeline {
             }
         }
         stage('Run Tests') {
-             steps {
-                script {
-                    sh 'docker-compose exec svm-service pytest /tests/test_svm.py'
-                    sh 'docker-compose exec vgg-service pytest /tests/test_vgg.py'
-                }
+        steps {
+            script {
+                sh 'docker-compose exec svm-microservice pytest /SVM-microservice/test_app1.py'
+                sh 'docker-compose exec vgg-microservice pytest /VGG-microservice/test_app2.py'
             }
         }
+}
+
         stage('Stop Services') {
             steps {
                 script {
