@@ -1,26 +1,23 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE_SVM = "svm_service_image"
-        DOCKER_IMAGE_VGG = "vgg19_service_image"
-        DOCKER_IMAGE_FRONTEND = "frontend_image"
+        DOCKER_IMAGE_SVM = "svm-microservice"
+        DOCKER_IMAGE_VGG = "vgg-microservice"
+        DOCKER_IMAGE_FRONTEND = "frontend"
     }
     stages {
-        stage('Checkout') {
+            stage('Clone') {
             steps {
-                checkout scm
+                git branch: 'master'
+                url: 'https://github.com/salsabilmoussa/MusicGenre.git'
             }
         }
+        
         stage('Build Docker Images') {
             steps {
                 script {
-                    // Build Docker images for SVM service
-                    docker.build(DOCKER_IMAGE_SVM, '../SVM_service/Dockerfile')
-
-                    // Build Docker images for VGG19 service
-                    docker.build(DOCKER_IMAGE_VGG, '../VGG19_service/Dockerfile')
-
-                    // Build Docker image for the frontend
+                    docker.build(DOCKER_IMAGE_SVM, '../SVM-microservice/Dockerfile')
+                    docker.build(DOCKER_IMAGE_VGG, '../VGG-microservice/Dockerfile')
                     docker.build(DOCKER_IMAGE_FRONTEND, '../frontend/Dockerfile')
                 }
             }
@@ -28,18 +25,15 @@ pipeline {
         stage('Run Docker Compose') {
             steps {
                 script {
-                    // Start Docker Compose for all services
                     sh 'docker-compose -f ../docker-compose.yaml up -d'
                 }
             }
         }
         stage('Run Tests') {
-            steps {
+             steps {
                 script {
-                    // Run automated tests for each service
-                    sh 'docker exec -t svm_service_container pytest tests/svm_tests.py'
-                    sh 'docker exec -t vgg19_service_container pytest tests/vgg19_tests.py'
-                    sh 'docker exec -t frontend_container pytest tests/frontend_tests.py'
+                    sh 'docker-compose exec svm-service pytest /tests/test_svm.py'
+                    sh 'docker-compose exec vgg-service pytest /tests/test_vgg.py'
                 }
             }
         }
