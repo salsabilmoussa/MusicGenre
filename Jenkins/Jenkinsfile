@@ -42,8 +42,8 @@ pipeline {
             steps {
                 script {
                     // Lancer les tests automatisés pour chaque service via docker-compose
-                    sh "docker-compose exec -T svm-microservice pytest ${WORKSPACE_PATH}/Jenkins/svm_tests.py"
-                    sh "docker-compose exec -T vgg19-microservice pytest ${WORKSPACE_PATH}/Jenkins/vgg19_tests.py"
+                    bat "docker-compose exec -T svm-microservice pytest ${WORKSPACE_PATH}/Jenkins/svm_tests.py"
+                    bat "docker-compose exec -T vgg19-microservice pytest ${WORKSPACE_PATH}/Jenkins/vgg19_tests.py"
             
                 }
             }
@@ -53,7 +53,7 @@ pipeline {
             steps {
                 script {
                     // Arrêter tous les conteneurs après les tests
-                    sh "docker-compose down"
+                    bat "docker-compose down"
                 }
             }
         }
