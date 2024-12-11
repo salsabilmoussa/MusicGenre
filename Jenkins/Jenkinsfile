@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         GIT_REPO = 'https://github.com/salsabilmoussa/MusicGenre.git'
         GIT_CREDENTIALS_ID = 'github_token'
@@ -7,6 +8,7 @@ pipeline {
         DOCKER_IMAGE_VGG = "vgg-microservice_image"
         DOCKER_IMAGE_FRONTEND = "frontend_image"
     }
+
     stages {
         stage('Checkout') {
             steps {
@@ -17,13 +19,13 @@ pipeline {
             steps {
                 script {
                     // Build Docker images for SVM service
-                    docker.build(DOCKER_IMAGE_SVM, '../SVM_microservice/Dockerfile')
+                    docker.build(DOCKER_IMAGE_SVM, './SVM_microservice')
 
                     // Build Docker images for VGG19 service
-                    docker.build(DOCKER_IMAGE_VGG, '../VGG_microservice/Dockerfile')
+                    docker.build(DOCKER_IMAGE_VGG, './VGG_microservice')
 
                     // Build Docker image for the frontend
-                    docker.build(DOCKER_IMAGE_FRONTEND, '../frontend/Dockerfile')
+                    docker.build(DOCKER_IMAGE_FRONTEND, './frontend')
                 }
             }
         }
@@ -31,17 +33,17 @@ pipeline {
             steps {
                 script {
                     // Start Docker Compose for all services
-                    sh 'docker-compose -f ../docker-compose.yaml up -d'
+                    sh 'docker-compose -f ./docker-compose.yaml up -d'
                 }
             }
         }
         stage('Run Tests') {
             steps {
                 script {
-                    // Run automated tests for each service
-                    sh 'docker exec -t svm_service_container pytest Jenkins/svm_tests.py'
-                    sh 'docker exec -t vgg19_service_container pytest Jenkins/vgg19_tests.py'
-                    sh 'docker exec -t frontend_container pytest Jenkins/frontend_tests.py'
+                    // Run automated tests for each service using docker-compose
+                    sh 'docker-compose exec -T svm_service_container pytest Jenkins/svm_tests.py'
+                    sh 'docker-compose exec -T vgg19_service_container pytest Jenkins/vgg19_tests.py'
+                    sh 'docker-compose exec -T frontend_container pytest Jenkins/frontend_tests.py'
                 }
             }
         }
@@ -54,6 +56,7 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             echo 'Build and tests successful!'
