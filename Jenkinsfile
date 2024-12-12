@@ -3,9 +3,9 @@ pipeline {
     environment {
          GIT_REPO = 'https://github.com/salsabilmoussa/MusicGenre.git'
         GIT_CREDENTIALS_ID = 'github_token'
-        DOCKER_IMAGE_SVM = "svm-microservice"
-        DOCKER_IMAGE_VGG = "vgg-microservice"
-        DOCKER_IMAGE_FRONTEND = "frontend"
+        DOCKER_IMAGE_SVM = "svm-microservice-1"
+        DOCKER_IMAGE_VGG = "vgg-microservice-1"
+        DOCKER_IMAGE_FRONTEND = "frontend-1"
     }
     stages {
              stage('Checkout') {
