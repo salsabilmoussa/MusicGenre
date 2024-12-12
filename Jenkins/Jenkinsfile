@@ -42,8 +42,8 @@ pipeline {
             steps {
                 script {
                     // Lancer les tests automatisés pour chaque service via docker-compose
-                    bat "docker-compose exec -T svm-microservice pytest ${WORKSPACE_PATH}/Jenkins/svm_tests.py"
-                    bat "docker-compose exec -T vgg19-microservice pytest ${WORKSPACE_PATH}/Jenkins/vgg19_tests.py"
+                    bat "docker-compose exec -T svm-microservice pytest ${WORKSPACE_PATH}/SVM-microservice/svm_tests.py"
+                    bat "docker-compose exec -T vgg19-microservice pytest ${WORKSPACE_PATH}/VGG-microservice/vgg19_tests.py"
             
                 }
             }
